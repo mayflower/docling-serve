@@ -29,7 +29,7 @@ permissions:
   id-token: write
 
 env:
-  IMAGE_NAME: ghcr.io/mayflower/docling-ocr-qwen3vl
+  IMAGE_NAME: ghcr.io/mayflower/docling-serve
 
 jobs:
   build-and-publish:
