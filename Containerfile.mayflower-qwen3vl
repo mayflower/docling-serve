@@ -1,0 +1,17 @@
+ARG BASE_IMAGE=ghcr.io/docling-project/docling-serve-cu128:main
+FROM ${BASE_IMAGE}
+
+ARG QWEN3VL_PLUGIN_REPO=https://github.com/mayflower/docling-ocr-qwen3vl.git
+ARG QWEN3VL_PLUGIN_REF=main
+
+USER 0
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+RUN /opt/app-root/bin/python -m pip install --no-cache-dir \
+    "git+${QWEN3VL_PLUGIN_REPO}@${QWEN3VL_PLUGIN_REF}" && \
+    /opt/app-root/bin/python -c "from docling_ocr_qwen3vl.options import Qwen3VlOcrOptions; print(Qwen3VlOcrOptions().model_repo_id)"
+
+ENV DOCLING_SERVE_ALLOW_EXTERNAL_PLUGINS=true
+
+USER 1001
