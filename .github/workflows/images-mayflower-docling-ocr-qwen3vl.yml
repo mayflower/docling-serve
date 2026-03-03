@@ -58,7 +58,7 @@ jobs:
             type=sha,prefix=sha-
             type=ref,event=branch
           flavor: |
-            latest={{is_default_branch}}
+            latest=true
 
       - name: Build and push image
         id: build
