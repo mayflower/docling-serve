@@ -8,6 +8,9 @@ USER 0
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
+# Cache-bust arg: change to force re-install of plugin
+ARG QWEN3VL_CACHE_BUST=1
+
 RUN /opt/app-root/bin/python -m pip install --no-cache-dir \
     "git+${QWEN3VL_PLUGIN_REPO}@${QWEN3VL_PLUGIN_REF}" && \
     /opt/app-root/bin/python -c "from docling_ocr_qwen3vl.options import DEFAULT_QWEN3VL_MODEL_REPO_ID; print('default_model_repo_id=', DEFAULT_QWEN3VL_MODEL_REPO_ID)"

@@ -76,6 +76,7 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ github.event.inputs.base_image || 'ghcr.io/docling-project/docling-serve-cu128:main' }}
             QWEN3VL_PLUGIN_REF=${{ github.event.inputs.plugin_ref || 'main' }}
+            QWEN3VL_CACHE_BUST=${{ github.run_id }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
