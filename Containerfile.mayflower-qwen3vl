@@ -8,8 +8,8 @@ USER 0
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
-RUN /opt/app-root/bin/python -m pip install --no-cache-dir \
-    flash-attn --no-build-isolation && \
+RUN MAX_JOBS=4 /opt/app-root/bin/python -m pip install --no-cache-dir \
+    flash-attn --no-build-isolation --no-binary flash-attn && \
     /opt/app-root/bin/python -m pip install --no-cache-dir \
     "git+${QWEN3VL_PLUGIN_REPO}@${QWEN3VL_PLUGIN_REF}" && \
     /opt/app-root/bin/python -c "import flash_attn; print('flash-attn', flash_attn.__version__); from docling_ocr_qwen3vl.options import DEFAULT_QWEN3VL_MODEL_REPO_ID; print('default_model_repo_id=', DEFAULT_QWEN3VL_MODEL_REPO_ID)"
