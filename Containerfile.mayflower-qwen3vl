@@ -3,17 +3,24 @@ FROM ${BASE_IMAGE}
 
 ARG QWEN3VL_PLUGIN_REPO=https://github.com/mayflower/docling-ocr-qwen3vl.git
 ARG QWEN3VL_PLUGIN_REF=main
+# Mayflower docling-jobkit fork carries the kind-based escape hatch in
+# _parse_picture_description_options that lets the plugin's own picture
+# description options class be reached via picture_description_custom_config.
+ARG DOCLING_JOBKIT_REPO=https://github.com/mayflower/docling-jobkit.git
+ARG DOCLING_JOBKIT_REF=main
 
 USER 0
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Cache-bust arg: change to force re-install of plugin
+# Cache-bust arg: change to force re-install of plugin layer
 ARG QWEN3VL_CACHE_BUST=1
 
 RUN /opt/app-root/bin/python -m pip install --no-cache-dir \
+    "git+${DOCLING_JOBKIT_REPO}@${DOCLING_JOBKIT_REF}" \
     "git+${QWEN3VL_PLUGIN_REPO}@${QWEN3VL_PLUGIN_REF}" && \
-    /opt/app-root/bin/python -c "from docling_ocr_qwen3vl.options import DEFAULT_QWEN3VL_MODEL_REPO_ID; print('default_model_repo_id=', DEFAULT_QWEN3VL_MODEL_REPO_ID)"
+    /opt/app-root/bin/python -c "from docling_ocr_qwen3vl.options import DEFAULT_QWEN3VL_MODEL_REPO_ID; print('default_model_repo_id=', DEFAULT_QWEN3VL_MODEL_REPO_ID)" && \
+    /opt/app-root/bin/python -c "from docling_jobkit.convert.manager import DoclingConverterManager; import inspect; assert 'create_options' in inspect.getsource(DoclingConverterManager._parse_picture_description_options), 'mayflower docling-jobkit fork not installed (missing kind escape hatch)'"
 
 ENV DOCLING_SERVE_ALLOW_EXTERNAL_PLUGINS=true \
     DOCLING_SERVE_ALLOW_CUSTOM_OCR_CONFIG=true \
