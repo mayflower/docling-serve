@@ -20,7 +20,7 @@ RUN set -euxo pipefail && \
     echo "--- base image versions ---" && \
     /opt/app-root/bin/python -m pip show docling docling-jobkit transformers | grep -E "^(Name|Version)" && \
     echo "--- installing mayflower docling-jobkit ---" && \
-    /opt/app-root/bin/python -m pip install --no-cache-dir \
+    /opt/app-root/bin/python -m pip install --no-cache-dir --force-reinstall --no-deps \
         "git+${DOCLING_JOBKIT_REPO}@${DOCLING_JOBKIT_REF}" && \
     echo "--- installing qwen3vl plugin ---" && \
     /opt/app-root/bin/python -m pip install --no-cache-dir \
@@ -29,7 +29,7 @@ RUN set -euxo pipefail && \
     /opt/app-root/bin/python -m pip show docling docling-jobkit docling-ocr-qwen3vl transformers | grep -E "^(Name|Version)" && \
     echo "--- sanity checks ---" && \
     /opt/app-root/bin/python -c "from docling_ocr_qwen3vl.options import DEFAULT_QWEN3VL_MODEL_REPO_ID; print('default_model_repo_id=', DEFAULT_QWEN3VL_MODEL_REPO_ID)" && \
-    /opt/app-root/bin/python -c "import docling_jobkit, pathlib; src = pathlib.Path(docling_jobkit.__file__).parent.joinpath('convert', 'manager.py').read_text(); marker = 'factory.create_options(kind, **payload)'; assert marker in src, 'mayflower docling-jobkit fork not installed (missing kind escape hatch); installed version=' + docling_jobkit.__version__; print('docling_jobkit version=', docling_jobkit.__version__)"
+    /opt/app-root/bin/python -c "import docling_jobkit, pathlib; mgr = pathlib.Path(docling_jobkit.__file__).parent.joinpath('convert', 'manager.py'); src = mgr.read_text(); marker = 'factory.create_options(kind, **payload)'; assert marker in src, 'mayflower docling-jobkit fork not installed (missing kind escape hatch in ' + str(mgr) + ')'; print('docling-jobkit kind escape hatch present at', mgr)"
 
 ENV DOCLING_SERVE_ALLOW_EXTERNAL_PLUGINS=true \
     DOCLING_SERVE_ALLOW_CUSTOM_OCR_CONFIG=true \
