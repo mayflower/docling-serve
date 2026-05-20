@@ -16,9 +16,18 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 # Cache-bust arg: change to force re-install of plugin layer
 ARG QWEN3VL_CACHE_BUST=1
 
-RUN /opt/app-root/bin/python -m pip install --no-cache-dir \
-    "git+${DOCLING_JOBKIT_REPO}@${DOCLING_JOBKIT_REF}" \
-    "git+${QWEN3VL_PLUGIN_REPO}@${QWEN3VL_PLUGIN_REF}" && \
+RUN set -euxo pipefail && \
+    echo "--- base image versions ---" && \
+    /opt/app-root/bin/python -m pip show docling docling-jobkit transformers | grep -E "^(Name|Version)" && \
+    echo "--- installing mayflower docling-jobkit ---" && \
+    /opt/app-root/bin/python -m pip install --no-cache-dir \
+        "git+${DOCLING_JOBKIT_REPO}@${DOCLING_JOBKIT_REF}" && \
+    echo "--- installing qwen3vl plugin ---" && \
+    /opt/app-root/bin/python -m pip install --no-cache-dir \
+        "git+${QWEN3VL_PLUGIN_REPO}@${QWEN3VL_PLUGIN_REF}" && \
+    echo "--- post-install versions ---" && \
+    /opt/app-root/bin/python -m pip show docling docling-jobkit docling-ocr-qwen3vl transformers | grep -E "^(Name|Version)" && \
+    echo "--- sanity checks ---" && \
     /opt/app-root/bin/python -c "from docling_ocr_qwen3vl.options import DEFAULT_QWEN3VL_MODEL_REPO_ID; print('default_model_repo_id=', DEFAULT_QWEN3VL_MODEL_REPO_ID)" && \
     /opt/app-root/bin/python -c "import docling_jobkit, pathlib; src = pathlib.Path(docling_jobkit.__file__).parent.joinpath('convert', 'manager.py').read_text(); marker = 'factory.create_options(kind, **payload)'; assert marker in src, 'mayflower docling-jobkit fork not installed (missing kind escape hatch); installed version=' + docling_jobkit.__version__; print('docling_jobkit version=', docling_jobkit.__version__)"
 
