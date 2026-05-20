@@ -20,7 +20,7 @@ RUN /opt/app-root/bin/python -m pip install --no-cache-dir \
     "git+${DOCLING_JOBKIT_REPO}@${DOCLING_JOBKIT_REF}" \
     "git+${QWEN3VL_PLUGIN_REPO}@${QWEN3VL_PLUGIN_REF}" && \
     /opt/app-root/bin/python -c "from docling_ocr_qwen3vl.options import DEFAULT_QWEN3VL_MODEL_REPO_ID; print('default_model_repo_id=', DEFAULT_QWEN3VL_MODEL_REPO_ID)" && \
-    /opt/app-root/bin/python -c "from docling_jobkit.convert.manager import DoclingConverterManager; import inspect; assert 'create_options' in inspect.getsource(DoclingConverterManager._parse_picture_description_options), 'mayflower docling-jobkit fork not installed (missing kind escape hatch)'"
+    /opt/app-root/bin/python -c "import docling_jobkit, pathlib; src = pathlib.Path(docling_jobkit.__file__).parent.joinpath('convert', 'manager.py').read_text(); marker = 'factory.create_options(kind, **payload)'; assert marker in src, 'mayflower docling-jobkit fork not installed (missing kind escape hatch); installed version=' + docling_jobkit.__version__; print('docling_jobkit version=', docling_jobkit.__version__)"
 
 ENV DOCLING_SERVE_ALLOW_EXTERNAL_PLUGINS=true \
     DOCLING_SERVE_ALLOW_CUSTOM_OCR_CONFIG=true \
