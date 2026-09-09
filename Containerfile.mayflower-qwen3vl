@@ -1,13 +1,16 @@
-ARG BASE_IMAGE=ghcr.io/docling-project/docling-serve-cu128:main
+ARG BASE_IMAGE=ghcr.io/docling-project/docling-serve-cu128@sha256:2485120b80a267a0f353da6126084742c7fb964097b5de7f8e25fbb1d851e289
 FROM ${BASE_IMAGE}
 
 ARG QWEN3VL_PLUGIN_REPO=https://github.com/mayflower/docling-ocr-qwen3vl.git
-ARG QWEN3VL_PLUGIN_REF=main
+ARG QWEN3VL_PLUGIN_REF=e89947209a43f764b4bdc6ddc5ccc8120e3dafdd
 # Mayflower docling-jobkit fork carries the kind-based escape hatch in
 # _parse_picture_description_options that lets the plugin's own picture
 # description options class be reached via picture_description_custom_config.
 ARG DOCLING_JOBKIT_REPO=https://github.com/mayflower/docling-jobkit.git
-ARG DOCLING_JOBKIT_REF=main
+ARG DOCLING_JOBKIT_REF=c612606c6472d94f67b5ddc224b6fb83b8be79ff
+# Docling 2.93.0 backport: do not unload PDF resources while OCR is in flight.
+ARG DOCLING_REPO=https://github.com/mayflower/docling.git
+ARG DOCLING_REF=96871968626b17d345ad225f0e35fb8770920ae8
 
 USER 0
 
@@ -25,8 +28,11 @@ RUN set -euxo pipefail && \
     echo "--- installing qwen3vl plugin ---" && \
     /opt/app-root/bin/python -m pip install --no-cache-dir \
         "git+${QWEN3VL_PLUGIN_REPO}@${QWEN3VL_PLUGIN_REF}" && \
+    echo "--- installing Docling timeout lifecycle fix ---" && \
+    /opt/app-root/bin/python -m pip install --no-cache-dir --force-reinstall --no-deps \
+        "git+${DOCLING_REPO}@${DOCLING_REF}" && \
     echo "--- post-install versions ---" && \
-    /opt/app-root/bin/python -m pip show docling docling-jobkit docling-ocr-qwen3vl transformers | grep -E "^(Name|Version)" && \
+    /opt/app-root/bin/python -m pip show docling docling-slim docling-jobkit docling-ocr-qwen3vl transformers | grep -E "^(Name|Version)" && \
     echo "--- sanity checks ---" && \
     /opt/app-root/bin/python -c "from docling_ocr_qwen3vl.options import DEFAULT_QWEN3VL_MODEL_REPO_ID; print('default_model_repo_id=', DEFAULT_QWEN3VL_MODEL_REPO_ID)" && \
     /opt/app-root/bin/python -c "import docling_jobkit, pathlib; mgr = pathlib.Path(docling_jobkit.__file__).parent.joinpath('convert', 'manager.py'); src = mgr.read_text(); marker = 'factory.create_options(kind, **payload)'; assert marker in src, 'mayflower docling-jobkit fork not installed (missing kind escape hatch in ' + str(mgr) + ')'; print('docling-jobkit kind escape hatch present at', mgr)"

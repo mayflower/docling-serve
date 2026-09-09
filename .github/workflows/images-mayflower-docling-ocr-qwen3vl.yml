@@ -12,11 +12,11 @@ on:
       base_image:
         description: "Base docling-serve image"
         required: true
-        default: "ghcr.io/docling-project/docling-serve-cu128:main"
+        default: "ghcr.io/docling-project/docling-serve-cu128@sha256:2485120b80a267a0f353da6126084742c7fb964097b5de7f8e25fbb1d851e289"
       plugin_ref:
         description: "Git ref for mayflower/docling-ocr-qwen3vl"
         required: true
-        default: "main"
+        default: "e89947209a43f764b4bdc6ddc5ccc8120e3dafdd"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -74,8 +74,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            BASE_IMAGE=${{ github.event.inputs.base_image || 'ghcr.io/docling-project/docling-serve-cu128:main' }}
-            QWEN3VL_PLUGIN_REF=${{ github.event.inputs.plugin_ref || 'main' }}
+            BASE_IMAGE=${{ github.event.inputs.base_image || 'ghcr.io/docling-project/docling-serve-cu128@sha256:2485120b80a267a0f353da6126084742c7fb964097b5de7f8e25fbb1d851e289' }}
+            QWEN3VL_PLUGIN_REF=${{ github.event.inputs.plugin_ref || 'e89947209a43f764b4bdc6ddc5ccc8120e3dafdd' }}
             QWEN3VL_CACHE_BUST=${{ github.run_id }}
 
       - name: Generate artifact attestation
